@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookVault - Your Digital Library</title>
+    <meta name="description" content="BookVault - Discover, explore, and manage your favorite books with AI-powered recommendations">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar container">
+            <div class="nav-brand">
+                <h1 class="logo">📚 BookVault</h1>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-page="library" id="libraryLink" style="display: none;">My Library</a></li>
+                <li><a href="#" class="nav-link" data-page="about">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
+                <div class="auth-buttons">
+                    <button id="loginBtn" class="auth-btn">Login</button>
+                    <button id="registerBtn" class="auth-btn">Register</button>
+                    <div id="userInfo" class="user-info" style="display: none;">
+                        <span id="usernameDisplay"></span>
+                        <button id="logoutBtn" class="auth-btn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Username or Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button type="submit" class="modal-btn">Login</button>
+            </form>
+            <p id="loginError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm">
+                <input type="text" id="registerUsername" placeholder="Username" required>
+                <input type="email" id="registerEmail" placeholder="Email" required>
+                <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required>
+                <button type="submit" class="modal-btn">Register</button>
+            </form>
+            <p id="registerError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Book Detail Modal -->
+    <div id="bookDetailModal" class="modal" style="display: none;">
+        <div class="modal-content book-detail-modal">
+            <span class="close-modal">&times;</span>
+            <div id="bookDetailContent"></div>
+        </div>
+    </div>
+
+    <!-- Book Recommender Widget -->
+    <div id="aiAssistant" class="ai-assistant">
+        <button id="aiToggle" class="ai-toggle-btn">
+            <span>📚</span>
+        </button>
+        <div id="aiChatWidget" class="ai-chat-widget" style="display: none;">
+            <div class="ai-chat-header">
+                <h3>Book Recommender</h3>
+                <button id="aiMinimize" class="ai-minimize">−</button>
+            </div>
+            <div id="aiChatMessages" class="ai-chat-messages"></div>
+            <div class="ai-chat-input-container">
+                <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tell me what you like, e.g., 'I like Harry Potter movies'">
+                <button id="aiSendBtn" class="ai-send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container" id="mainContent">
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+            <section class="search-section">
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder=""
+                            autocomplete="off"
+                        >
+                        <span class="search-placeholder">Search for books by title, author, or keyword...</span>
+                    </div>
+                    <button id="searchBtn" class="search-btn">🔍 Search</button>
+                    <div class="genre-dropdown-container">
+                        <button id="genreToggle" class="genre-toggle-btn">
+                            <span class="genre-icon">📖</span>
+                            <span>Browse Genres</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div id="genreDropdown" class="genre-dropdown" style="display: none;">
+                            <button class="genre-item" onclick="selectGenre('fiction')">Fiction</button>
+                            <button class="genre-item" onclick="selectGenre('mystery')">Mystery</button>
+                            <button class="genre-item" onclick="selectGenre('romance')">Romance</button>
+                            <button class="genre-item" onclick="selectGenre('science fiction')">Sci-Fi</button>
+                            <button class="genre-item" onclick="selectGenre('fantasy')">Fantasy</button>
+                            <button class="genre-item" onclick="selectGenre('horror')">Horror</button>
+                            <button class="genre-item" onclick="selectGenre('biography')">Biography</button>
+                            <button class="genre-item" onclick="selectGenre('history')">History</button>
+                            <button class="genre-item" onclick="selectGenre('philosophy')">Philosophy</button>
+                            <button class="genre-item" onclick="selectGenre('poetry')">Poetry</button>
+                            <button class="genre-item" onclick="selectGenre('children')">Children</button>
+                            <button class="genre-item" onclick="selectGenre('free books')">Free Books</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="loading-section" id="loadingSection" style="display: none;">
+                <div class="spinner"></div>
+                <p>Searching for books...</p>
+            </section>
+
+            <section class="results-section">
+                <div id="resultsHeader" class="results-header" style="display: none;">
+                    <h2 id="resultsTitle"></h2>
+                    <p id="resultsCount"></p>
+                </div>
+                <div id="booksContainer" class="books-container"></div>
+            </section>
+
+            <section class="no-results" id="noResults" style="display: none;">
+                <p>No books found. Try a different search term or genre.</p>
+            </section>
+        </div>
+
+        <!-- My Library Page -->
+        <div id="libraryPage" class="page" style="display: none;">
+            <section class="library-section">
+                <h2>My Library</h2>
+                <p class="library-subtitle">Your saved and favorite books</p>
+                <div id="libraryContainer" class="books-container"></div>
+                <div id="emptyLibrary" class="empty-library" style="display: none;">
+                    <p>Your library is empty. Start adding books from the home page!</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- About Page -->
+        <div id="aboutPage" class="page" style="display: none;">
+            <section class="about-section">
+                <h2>About BookVault</h2>
+                <div class="about-content">
+                    <p>BookVault is your comprehensive digital library platform that helps you discover, explore, and manage your favorite books.</p>
+                    <h3>Features</h3>
+                    <ul>
+                        <li>🔍 Search thousands of books from multiple sources</li>
+                        <li>📚 Organize your personal library</li>
+                        <li>🤖 AI-powered book recommendations</li>
+                        <li>⭐ Real-time book reviews and ratings</li>
+                        <li>🌙 Dark mode support</li>
+                        <li>📱 Fully responsive design</li>
+                    </ul>
+                    <h3>Powered By</h3>
+                    <p>Google Books API, Open Library, and Project Gutenberg</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 BookVault. Powered by Google Books, Open Library, and Project Gutenberg.</p>
+        </div>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/library.js"></script>
+    <script src="js/reviews.js"></script>
+    <script src="js/ai-assistant.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
