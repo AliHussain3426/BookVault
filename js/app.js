@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     initializeAIAssistant();
     initializeNavigation();
+    loadTopBooks();
 });
 
 /**
@@ -223,11 +224,188 @@ function showPage(pageName) {
         // Initialize page-specific content
         if (pageName === 'library') {
             displayLibrary();
+        } else if (pageName === 'home') {
+            loadTopBooks();
         }
     }
     
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * Load top books from all genres
+ */
+async function loadTopBooks() {
+    const container = document.getElementById('topBooksContainer');
+    if (!container) return;
+
+    // Show loading
+    container.innerHTML = '<div class="loading-books"><div class="spinner"></div><p>Loading top books...</p></div>';
+
+    try {
+        // Determine backend URL
+        const backendUrl = window.location.origin.includes('8000') 
+            ? 'http://localhost:3000' 
+            : window.location.origin;
+
+        const response = await fetch(`${backendUrl}/api/top-books?perGenre=4`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load top books');
+        }
+
+        const data = await response.json();
+        
+        if (data.books && data.books.length > 0) {
+            displayTopBooks(data.books);
+        } else {
+            // Fallback: use direct Google Books API
+            loadTopBooksFallback();
+        }
+    } catch (error) {
+        console.error('Error loading top books:', error);
+        // Fallback to using direct API
+        loadTopBooksFallback();
+    }
+}
+
+/**
+ * Fallback: Load top books using direct Google Books API
+ */
+async function loadTopBooksFallback() {
+    const genres = ['fiction', 'fantasy', 'mystery', 'romance', 'science fiction', 'horror', 'thriller', 'adventure'];
+    const allBooks = [];
+
+    for (const genre of genres.slice(0, 6)) {
+        try {
+            const books = await searchAllBooks(`subject:${genre}`, 'google');
+            if (books.length > 0) {
+                allBooks.push(...books.slice(0, 3).map(book => ({ ...book, genre })));
+            }
+        } catch (error) {
+            console.error(`Error loading ${genre} books:`, error);
+        }
+    }
+
+    if (allBooks.length > 0) {
+        displayTopBooks(allBooks);
+    } else {
+        const container = document.getElementById('topBooksContainer');
+        if (container) {
+            container.innerHTML = '<p class="no-books-message">Top books will appear here. Try searching for books to get started!</p>';
+        }
+    }
+}
+
+/**
+ * Display top books in grouped sections by genre
+ */
+function displayTopBooks(books) {
+    const container = document.getElementById('topBooksContainer');
+    if (!container) return;
+
+    // Group books by genre
+    const booksByGenre = {};
+    books.forEach(book => {
+        const genre = book.genre || 'General';
+        if (!booksByGenre[genre]) {
+            booksByGenre[genre] = [];
+        }
+        booksByGenre[genre].push(book);
+    });
+
+    let html = '';
+
+    // Display books grouped by genre
+    for (const [genre, genreBooks] of Object.entries(booksByGenre)) {
+        const genreName = genre.charAt(0).toUpperCase() + genre.slice(1).replace(/([A-Z])/g, ' $1');
+        
+        html += `<div class="genre-books-section">
+            <h3 class="genre-section-title">📚 Top ${genreName} Books</h3>
+            <div class="genre-books-grid">`;
+        
+        genreBooks.forEach((book) => {
+            const bookCard = createTopBookCard(book);
+            html += bookCard.outerHTML;
+        });
+        
+        html += `</div></div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+/**
+ * Create a top book card for display
+ */
+function createTopBookCard(book) {
+    const card = document.createElement('div');
+    card.className = 'top-book-card';
+    card.dataset.bookId = book.id;
+    
+    // Cover image
+    const coverDiv = document.createElement('div');
+    coverDiv.className = 'top-book-cover';
+    
+    const thumbnailUrl = getThumbnailUrl(book.image || book.thumbnail);
+    if (thumbnailUrl && isValidUrl(thumbnailUrl)) {
+        const img = document.createElement('img');
+        img.src = thumbnailUrl;
+        img.alt = book.title;
+        img.loading = 'lazy';
+        img.onerror = function() {
+            this.style.display = 'none';
+            coverDiv.textContent = createPlaceholderCover(book.title);
+        };
+        coverDiv.appendChild(img);
+    } else {
+        coverDiv.textContent = createPlaceholderCover(book.title);
+    }
+    
+    card.appendChild(coverDiv);
+    
+    // Info
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'top-book-info';
+    
+    // Title
+    const titleElement = document.createElement('h4');
+    titleElement.className = 'top-book-title';
+    titleElement.textContent = sanitizeHTML(book.title);
+    infoDiv.appendChild(titleElement);
+    
+    // Author
+    const authorElement = document.createElement('p');
+    authorElement.className = 'top-book-author';
+    const author = Array.isArray(book.authors) 
+        ? formatAuthors(book.authors) 
+        : (book.authors || book.author || 'Unknown Author');
+    authorElement.textContent = author;
+    infoDiv.appendChild(authorElement);
+    
+    // Rating
+    if (book.rating) {
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'top-book-rating';
+        ratingDiv.innerHTML = formatRating(book.rating);
+        if (book.ratingCount) {
+            ratingDiv.innerHTML += ` <span class="rating-count">(${book.ratingCount})</span>`;
+        }
+        infoDiv.appendChild(ratingDiv);
+    }
+    
+    // View button
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'top-book-view-btn';
+    viewBtn.textContent = 'View Details';
+    viewBtn.onclick = () => showBookDetails(book);
+    infoDiv.appendChild(viewBtn);
+    
+    card.appendChild(infoDiv);
+    card.onclick = () => showBookDetails(book);
+    
+    return card;
 }
 
 /**
@@ -330,12 +508,30 @@ async function searchByGenre(genre) {
         if (genre === 'free books') {
             books = await searchByGenreAPI('free books');
         } else {
-            books = await searchByGenreAPI(genreTerm);
+            // Try backend API first for top genre books
+            try {
+                const backendUrl = window.location.origin.includes('8000') 
+                    ? 'http://localhost:3000' 
+                    : window.location.origin;
+                
+                const response = await fetch(`${backendUrl}/api/recommend-by-genre/${genre}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    books = data.recommendations || [];
+                } else {
+                    throw new Error('Backend API failed');
+                }
+            } catch (error) {
+                // Fallback to direct API
+                console.log('Using fallback API for genre:', genre);
+                books = await searchByGenreAPI(genreTerm);
+            }
         }
         
         const displayTitle = genre === 'free books' 
             ? 'Free Books from Project Gutenberg'
-            : `${genre.charAt(0).toUpperCase() + genre.slice(1)} Books`;
+            : `⭐ Top ${genre.charAt(0).toUpperCase() + genre.slice(1)} Books`;
         
         displayBooks(books, displayTitle);
         

@@ -70,19 +70,19 @@
         </div>
     </div>
 
-    <!-- Book Recommender Widget -->
+    <!-- Mood Based Book Recommendor Widget -->
     <div id="aiAssistant" class="ai-assistant">
         <button id="aiToggle" class="ai-toggle-btn">
-            <span>📚</span>
+            <span>💫</span>
         </button>
         <div id="aiChatWidget" class="ai-chat-widget" style="display: none;">
             <div class="ai-chat-header">
-                <h3>Book Recommender</h3>
+                <h3>💫 Mood Based Book Recommendor</h3>
                 <button id="aiMinimize" class="ai-minimize">−</button>
             </div>
             <div id="aiChatMessages" class="ai-chat-messages"></div>
             <div class="ai-chat-input-container">
-                <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tell me what you like, e.g., 'I like Harry Potter movies'">
+                <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Tell me your mood, e.g., 'I feel romantic' or 'happy'">
                 <button id="aiSendBtn" class="ai-send-btn">Send</button>
             </div>
         </div>
@@ -112,19 +112,30 @@
                             <span class="arrow">▼</span>
                         </button>
                         <div id="genreDropdown" class="genre-dropdown" style="display: none;">
-                            <button class="genre-item" onclick="selectGenre('fiction')">Fiction</button>
-                            <button class="genre-item" onclick="selectGenre('mystery')">Mystery</button>
-                            <button class="genre-item" onclick="selectGenre('romance')">Romance</button>
-                            <button class="genre-item" onclick="selectGenre('science fiction')">Sci-Fi</button>
-                            <button class="genre-item" onclick="selectGenre('fantasy')">Fantasy</button>
-                            <button class="genre-item" onclick="selectGenre('horror')">Horror</button>
-                            <button class="genre-item" onclick="selectGenre('biography')">Biography</button>
-                            <button class="genre-item" onclick="selectGenre('history')">History</button>
-                            <button class="genre-item" onclick="selectGenre('philosophy')">Philosophy</button>
-                            <button class="genre-item" onclick="selectGenre('poetry')">Poetry</button>
-                            <button class="genre-item" onclick="selectGenre('children')">Children</button>
-                            <button class="genre-item" onclick="selectGenre('free books')">Free Books</button>
+                            <button class="genre-item" onclick="selectGenre('fiction')">⭐ Fiction</button>
+                            <button class="genre-item" onclick="selectGenre('fantasy')">⭐ Fantasy</button>
+                            <button class="genre-item" onclick="selectGenre('mystery')">⭐ Mystery</button>
+                            <button class="genre-item" onclick="selectGenre('romance')">⭐ Romance</button>
+                            <button class="genre-item" onclick="selectGenre('science fiction')">⭐ Sci-Fi</button>
+                            <button class="genre-item" onclick="selectGenre('horror')">⭐ Horror</button>
+                            <button class="genre-item" onclick="selectGenre('thriller')">⭐ Thriller</button>
+                            <button class="genre-item" onclick="selectGenre('adventure')">⭐ Adventure</button>
+                            <button class="genre-item" onclick="selectGenre('biography')">⭐ Biography</button>
+                            <button class="genre-item" onclick="selectGenre('history')">⭐ History</button>
+                            <button class="genre-item" onclick="selectGenre('philosophy')">⭐ Philosophy</button>
+                            <button class="genre-item" onclick="selectGenre('poetry')">⭐ Poetry</button>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Top Books by Genre Section -->
+            <section class="top-books-section" id="topBooksSection">
+                <h2 class="section-title">⭐ Top Books from All Genres</h2>
+                <div id="topBooksContainer" class="top-books-container">
+                    <div class="loading-books">
+                        <div class="spinner"></div>
+                        <p>Loading top books...</p>
                     </div>
                 </div>
             </section>
