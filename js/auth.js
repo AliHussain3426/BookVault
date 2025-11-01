@@ -35,12 +35,14 @@ function registerUser(username, email, password) {
     
     // Check if username or email already exists
     if (users.some(u => u.username === username || u.email === email)) {
-        return { success: false, message: 'Username or email already exists' };
+        const msg = (window.__i18n ? window.__i18n.t('auth.usernameOrEmailExists') : 'Username or email already exists');
+        return { success: false, message: msg };
     }
     
     // Validate password
     if (password.length < 6) {
-        return { success: false, message: 'Password must be at least 6 characters' };
+        const msg = (window.__i18n ? window.__i18n.t('auth.passwordTooShort') : 'Password must be at least 6 characters');
+        return { success: false, message: msg };
     }
     
     // Create new user
@@ -58,7 +60,7 @@ function registerUser(username, email, password) {
     // Auto login
     setCurrentUser({ username: newUser.username, email: newUser.email, id: newUser.id });
     
-    return { success: true, message: 'Registration successful!', user: newUser };
+    return { success: true, message: (window.__i18n ? window.__i18n.t('auth.registrationSuccess') : 'Registration successful!'), user: newUser };
 }
 
 // Login user
@@ -67,17 +69,17 @@ function loginUser(username, password) {
     const user = users.find(u => (u.username === username || u.email === username) && u.password === password);
     
     if (!user) {
-        return { success: false, message: 'Invalid username or password' };
+        return { success: false, message: (window.__i18n ? window.__i18n.t('auth.invalidCredentials') : 'Invalid username or password') };
     }
     
     setCurrentUser({ username: user.username, email: user.email, id: user.id });
-    return { success: true, message: 'Login successful!', user };
+    return { success: true, message: (window.__i18n ? window.__i18n.t('auth.loginSuccess') : 'Login successful!'), user };
 }
 
 // Logout user
 function logoutUser() {
     setCurrentUser(null);
-    return { success: true, message: 'Logged out successfully' };
+    return { success: true, message: (window.__i18n ? window.__i18n.t('auth.logoutSuccess') : 'Logged out successfully') };
 }
 
 // Check if user is logged in

@@ -1,12 +1,12 @@
 /**
- * Mood Based Book Recommendor - Frontend
+ * MoodMage - Frontend
  * Interactive mood-based book recommendation system
  */
 
 let chatHistory = [];
 let moodHistory = []; // Store last 3 moods
 
-// Initialize Mood Based Book Recommendor
+// Initialize MoodMage
 function initializeAIAssistant() {
     const aiToggle = document.getElementById('aiToggle');
     const aiChatWidget = document.getElementById('aiChatWidget');
@@ -21,7 +21,7 @@ function initializeAIAssistant() {
         const isVisible = aiChatWidget.style.display !== 'none';
         aiChatWidget.style.display = isVisible ? 'none' : 'flex';
         if (!isVisible && chatHistory.length === 0) {
-            addAIMessage('assistant', 'Hello! I\'m your 💫 Mood Based Book Recommendor! Tell me how you\'re feeling or what mood you\'re in (like "happy", "romantic", "adventurous", "mysterious"), and I\'ll recommend perfect books for you! 📚✨');
+            addAIMessage('assistant', 'Hello! I\'m MoodMage 💫 Your magical mood-based book companion! Tell me how you\'re feeling or what mood you\'re in (like "happy", "romantic", "adventurous", "mysterious"), and I\'ll recommend perfect books for you! 📚✨');
         }
     });
     

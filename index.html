@@ -8,7 +8,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:wght@400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -16,50 +16,21 @@
         <nav class="navbar container">
             <div class="nav-brand">
                 <a href="#" class="brand" aria-label="BookVault Home">
-                    <img src="images/bookvault-logo.png.png" alt="BookVault logo" class="brand-logo" />
-                    <span class="brand-text">BookVault</span>
+                    <span class="brand-text" data-i18n="brand.title">BookVault</span>
                 </a>
             </div>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
-                <li class="nav-lang">
-                    <label for="languageSelect" class="sr-only">Language</label>
-                    <select id="languageSelect" class="language-select" aria-label="Select language">
-                        <option value="en">English</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="it">Italiano</option>
-                        <option value="pt">Português</option>
-                        <option value="ru">Русский</option>
-                        <option value="zh-CN">简体中文</option>
-                        <option value="zh-TW">繁體中文</option>
-                        <option value="ja">日本語</option>
-                        <option value="ko">한국어</option>
-                        <option value="ar">العربية</option>
-                        <option value="hi">हिन्दी</option>
-                        <option value="bn">বাংলা</option>
-                        <option value="ur">اردو</option>
-                        <option value="tr">Türkçe</option>
-                        <option value="nl">Nederlands</option>
-                        <option value="sv">Svenska</option>
-                        <option value="pl">Polski</option>
-                        <option value="uk">Українська</option>
-                        <option value="vi">Tiếng Việt</option>
-                        <option value="th">ไทย</option>
-                    </select>
-                </li>
-                <li><a href="#" class="nav-link" data-page="library" id="libraryLink" style="display: none;">My Library</a></li>
-                <li><a href="#" class="nav-link" data-page="about">About</a></li>
+                <li><a href="#" class="nav-link" data-page="library" id="libraryLink" style="display: none;" data-i18n="nav.library">My Library</a></li>
+                <li><a href="#" class="nav-link active" data-page="home" data-i18n="nav.home">Home</a></li>
             </ul>
             <div class="nav-actions">
                 <button id="themeToggle" class="theme-toggle" title="Toggle Dark Mode">🌙</button>
                 <div class="auth-buttons">
-                    <button id="loginBtn" class="auth-btn">Login</button>
-                    <button id="registerBtn" class="auth-btn">Register</button>
+                    <button id="loginBtn" class="auth-btn" data-i18n="auth.login">Login</button>
+                    <button id="registerBtn" class="auth-btn" data-i18n="auth.register">Register</button>
                     <div id="userInfo" class="user-info" style="display: none;">
                         <span id="usernameDisplay"></span>
-                        <button id="logoutBtn" class="auth-btn">Logout</button>
+                        <button id="logoutBtn" class="auth-btn" data-i18n="auth.logout">Logout</button>
                     </div>
                 </div>
             </div>
@@ -70,11 +41,11 @@
     <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2>Login</h2>
+            <h2 data-i18n="modal.login.title">Login</h2>
             <form id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Username or Email" required>
-                <input type="password" id="loginPassword" placeholder="Password" required>
-                <button type="submit" class="modal-btn">Login</button>
+                <input type="text" id="loginUsername" required data-i18n-attr="placeholder:modal.usernameOrEmail" placeholder="Username or Email">
+                <input type="password" id="loginPassword" required data-i18n-attr="placeholder:modal.password" placeholder="Password">
+                <button type="submit" class="modal-btn" data-i18n="modal.login.submit">Login</button>
             </form>
             <p id="loginError" class="error-message"></p>
         </div>
@@ -84,12 +55,12 @@
     <div id="registerModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
-            <h2>Register</h2>
+            <h2 data-i18n="modal.register.title">Register</h2>
             <form id="registerForm">
-                <input type="text" id="registerUsername" placeholder="Username" required>
-                <input type="email" id="registerEmail" placeholder="Email" required>
-                <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required>
-                <button type="submit" class="modal-btn">Register</button>
+                <input type="text" id="registerUsername" required data-i18n-attr="placeholder:modal.username" placeholder="Username">
+                <input type="email" id="registerEmail" required data-i18n-attr="placeholder:modal.email" placeholder="Email">
+                <input type="password" id="registerPassword" required data-i18n-attr="placeholder:modal.passwordHint" placeholder="Password (min 6 characters)">
+                <button type="submit" class="modal-btn" data-i18n="modal.register.submit">Register</button>
             </form>
             <p id="registerError" class="error-message"></p>
         </div>
@@ -103,14 +74,14 @@
         </div>
     </div>
 
-    <!-- Mood Based Book Recommendor Widget -->
+    <!-- MoodMage Widget -->
     <div id="aiAssistant" class="ai-assistant">
         <button id="aiToggle" class="ai-toggle-btn">
             <span>💫</span>
         </button>
         <div id="aiChatWidget" class="ai-chat-widget" style="display: none;">
             <div class="ai-chat-header">
-                <h3>💫 Mood Based Book Recommendor</h3>
+                <h3>💫 MoodMage</h3>
                 <button id="aiMinimize" class="ai-minimize">−</button>
             </div>
             <div id="aiChatMessages" class="ai-chat-messages"></div>
@@ -126,37 +97,41 @@
         <!-- Home Page -->
         <div id="homePage" class="page active">
             <section class="search-section">
+                <div class="vintage-intro">
+                    <h2 class="vintage-title" data-i18n="intro.title">Welcome to BookVault</h2>
+                    <p class="vintage-tagline">Where Pages Breathe</p>
+                </div>
                 <div class="search-container">
                     <div class="search-input-wrapper">
                         <input 
                             type="text" 
                             id="searchInput" 
                             class="search-input" 
-                            placeholder=""
+                            data-i18n-attr="placeholder:search.placeholder"
                             autocomplete="off"
                         >
-                        <span class="search-placeholder">Search for books by title, author, or keyword...</span>
+                        <span class="search-placeholder" data-i18n="search.placeholder">Search for books by title, author, or keyword...</span>
                     </div>
-                    <button id="searchBtn" class="search-btn">🔍 Search</button>
+                    <button id="searchBtn" class="search-btn"><span aria-hidden="true">🔍</span> <span data-i18n="search.button">Search</span></button>
                     <div class="genre-dropdown-container">
                         <button id="genreToggle" class="genre-toggle-btn">
                             <span class="genre-icon">📖</span>
-                            <span>Browse Genres</span>
+                            <span data-i18n="genres.browse">Browse Genres</span>
                             <span class="arrow">▼</span>
                         </button>
                         <div id="genreDropdown" class="genre-dropdown" style="display: none;">
-                            <button class="genre-item" onclick="selectGenre('fiction')">⭐ Fiction</button>
-                            <button class="genre-item" onclick="selectGenre('fantasy')">⭐ Fantasy</button>
-                            <button class="genre-item" onclick="selectGenre('mystery')">⭐ Mystery</button>
-                            <button class="genre-item" onclick="selectGenre('romance')">⭐ Romance</button>
-                            <button class="genre-item" onclick="selectGenre('science fiction')">⭐ Sci-Fi</button>
-                            <button class="genre-item" onclick="selectGenre('horror')">⭐ Horror</button>
-                            <button class="genre-item" onclick="selectGenre('thriller')">⭐ Thriller</button>
-                            <button class="genre-item" onclick="selectGenre('adventure')">⭐ Adventure</button>
-                            <button class="genre-item" onclick="selectGenre('biography')">⭐ Biography</button>
-                            <button class="genre-item" onclick="selectGenre('history')">⭐ History</button>
-                            <button class="genre-item" onclick="selectGenre('philosophy')">⭐ Philosophy</button>
-                            <button class="genre-item" onclick="selectGenre('poetry')">⭐ Poetry</button>
+                            <button class="genre-item" onclick="selectGenre('fiction')">⭐ <span data-i18n="genre.fiction">Fiction</span></button>
+                            <button class="genre-item" onclick="selectGenre('fantasy')">⭐ <span data-i18n="genre.fantasy">Fantasy</span></button>
+                            <button class="genre-item" onclick="selectGenre('mystery')">⭐ <span data-i18n="genre.mystery">Mystery</span></button>
+                            <button class="genre-item" onclick="selectGenre('romance')">⭐ <span data-i18n="genre.romance">Romance</span></button>
+                            <button class="genre-item" onclick="selectGenre('science fiction')">⭐ <span data-i18n="genre.scifi">Sci-Fi</span></button>
+                            <button class="genre-item" onclick="selectGenre('horror')">⭐ <span data-i18n="genre.horror">Horror</span></button>
+                            <button class="genre-item" onclick="selectGenre('thriller')">⭐ <span data-i18n="genre.thriller">Thriller</span></button>
+                            <button class="genre-item" onclick="selectGenre('adventure')">⭐ <span data-i18n="genre.adventure">Adventure</span></button>
+                            <button class="genre-item" onclick="selectGenre('biography')">⭐ <span data-i18n="genre.biography">Biography</span></button>
+                            <button class="genre-item" onclick="selectGenre('history')">⭐ <span data-i18n="genre.history">History</span></button>
+                            <button class="genre-item" onclick="selectGenre('philosophy')">⭐ <span data-i18n="genre.philosophy">Philosophy</span></button>
+                            <button class="genre-item" onclick="selectGenre('poetry')">⭐ <span data-i18n="genre.poetry">Poetry</span></button>
                         </div>
                     </div>
                 </div>
@@ -164,18 +139,18 @@
 
             <!-- Top Books by Genre Section -->
             <section class="top-books-section" id="topBooksSection">
-                <h2 class="section-title">⭐ Top Books from All Genres</h2>
+                <h2 class="section-title" data-i18n="top.title">📚 Librarian’s Picks</h2>
                 <div id="topBooksContainer" class="top-books-container">
                     <div class="loading-books">
                         <div class="spinner"></div>
-                        <p>Loading top books...</p>
+                        <p data-i18n="loading.top">Loading top books...</p>
                     </div>
                 </div>
             </section>
 
             <section class="loading-section" id="loadingSection" style="display: none;">
                 <div class="spinner"></div>
-                <p>Searching for books...</p>
+                <p data-i18n="loading.search">Searching for books...</p>
             </section>
 
             <section class="results-section">
@@ -187,18 +162,35 @@
             </section>
 
             <section class="no-results" id="noResults" style="display: none;">
-                <p>No books found. Try a different search term or genre.</p>
+                <p data-i18n="no.results">No books found. Try a different search term or genre.</p>
             </section>
         </div>
 
         <!-- My Library Page -->
         <div id="libraryPage" class="page" style="display: none;">
             <section class="library-section">
-                <h2>My Library</h2>
-                <p class="library-subtitle">Your saved and favorite books</p>
+                <h2 data-i18n="library.title">My Library</h2>
+                <p class="library-subtitle" data-i18n="library.subtitle">Your saved and favorite books</p>
                 <div id="libraryContainer" class="books-container"></div>
                 <div id="emptyLibrary" class="empty-library" style="display: none;">
-                    <p>Your library is empty. Start adding books from the home page!</p>
+                    <p data-i18n="library.empty">Your library is empty. Start adding books from the home page!</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profilePage" class="page" style="display: none;">
+            <section class="profile-section">
+                <h2 data-i18n="profile.title">Profile</h2>
+                <div class="profile-panels">
+                    <div class="favorites-panel">
+                        <h3 data-i18n="favorites.title">Favorite Books</h3>
+                        <p class="panel-subtitle" data-i18n="favorites.subtitle">Books you have marked as favorites</p>
+                        <div id="favoritesContainer" class="books-container"></div>
+                        <div id="emptyFavorites" class="empty-library" style="display: none;">
+                            <p data-i18n="favorites.empty">No favorites yet. Tap the heart on any book to add it here.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -227,12 +219,14 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2024 BookVault. Powered by Google Books, Open Library, and Project Gutenberg.</p>
+            <p data-i18n="footer.text">&copy; 2024 BookVault. Powered by Google Books, Open Library, and Project Gutenberg.</p>
         </div>
     </footer>
 
     <script src="js/utils.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/favorites.js"></script>
     <script src="js/api.js"></script>
     <script src="js/library.js"></script>
     <script src="js/reviews.js"></script>

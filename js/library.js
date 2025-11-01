@@ -24,7 +24,8 @@ function saveLibrary(books) {
 function addToLibrary(book) {
     const user = getCurrentUser();
     if (!user) {
-        alert('Please login to save books to your library');
+        const msg = (window.__i18n ? window.__i18n.t('auth.pleaseLoginToSave') : 'Please login to save books to your library');
+        alert(msg);
         return false;
     }
     
@@ -150,9 +151,10 @@ function createLibraryBookCard(book) {
     // Remove button
     const removeBtn = document.createElement('button');
     removeBtn.className = 'library-remove-btn';
-    removeBtn.innerHTML = '🗑️ Remove';
+    removeBtn.innerHTML = `🗑️ ${(window.__i18n ? window.__i18n.t('library.remove') : 'Remove')}`;
     removeBtn.onclick = () => {
-        if (confirm('Remove this book from your library?')) {
+        const q = (window.__i18n ? window.__i18n.t('library.confirmRemove') : 'Remove this book from your library?');
+        if (confirm(q)) {
             removeFromLibrary(book.id);
             displayLibrary();
         }
@@ -162,7 +164,7 @@ function createLibraryBookCard(book) {
     // View button
     const viewBtn = document.createElement('button');
     viewBtn.className = 'book-link';
-    viewBtn.textContent = 'View Details';
+    viewBtn.textContent = (window.__i18n ? window.__i18n.t('book.viewDetails') : 'View Details');
     viewBtn.onclick = () => showBookDetails(book);
     infoDiv.appendChild(viewBtn);
     

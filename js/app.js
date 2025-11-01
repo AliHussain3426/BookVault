@@ -1,3 +1,21 @@
+// 15 default preview books (lightweight data) to show instantly
+const DEFAULT_TOP_BOOKS = [
+  { id: 'd1', title: 'The Classic Tome', authors: ['A. Writer'], thumbnail: '', genre: 'fiction' },
+  { id: 'd2', title: 'Beneath Old Oaks', authors: ['E. Greene'], thumbnail: '', genre: 'fiction' },
+  { id: 'd3', title: 'Whispers of Pages', authors: ['L. Porter'], thumbnail: '', genre: 'fiction' },
+  { id: 'd4', title: 'Guild of Stars', authors: ['M. Hewitt'], thumbnail: '', genre: 'fantasy' },
+  { id: 'd5', title: 'Ember & Ash', authors: ['K. Rowan'], thumbnail: '', genre: 'fantasy' },
+  { id: 'd6', title: 'Crown of Thorns', authors: ['S. Vale'], thumbnail: '', genre: 'fantasy' },
+  { id: 'd7', title: 'Clockwork Ciphers', authors: ['I. Black'], thumbnail: '', genre: 'mystery' },
+  { id: 'd8', title: 'The Lost Ledger', authors: ['R. Finch'], thumbnail: '', genre: 'mystery' },
+  { id: 'd9', title: 'Ink & Alibi', authors: ['P. Doyle'], thumbnail: '', genre: 'mystery' },
+  { id: 'd10', title: 'Letters Never Sent', authors: ['E. Hart'], thumbnail: '', genre: 'romance' },
+  { id: 'd11', title: 'Autumn Serenade', authors: ['C. Wren'], thumbnail: '', genre: 'romance' },
+  { id: 'd12', title: 'Lanterns at Dusk', authors: ['J. Hale'], thumbnail: '', genre: 'romance' },
+  { id: 'd13', title: 'Orbit of Echoes', authors: ['T. Quill'], thumbnail: '', genre: 'science fiction' },
+  { id: 'd14', title: 'Brass Nebula', authors: ['N. Rivers'], thumbnail: '', genre: 'science fiction' },
+  { id: 'd15', title: 'Pilgrim to Andromeda', authors: ['V. Cross'], thumbnail: '', genre: 'science fiction' }
+];
 /**
  * Main Application Logic for BookVault
  * Handles UI interactions, search, and book display
@@ -15,8 +33,45 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeAIAssistant();
     initializeNavigation();
     initializeLanguage();
+    // Apply initial translations after DOM is ready
+    if (window.__i18n) {
+        window.__i18n.applyTranslations(document);
+    }
+    // Prefill Top Books with default preview (15 items) for instant render
+    const topContainer = document.getElementById('topBooksContainer');
+    if (topContainer) {
+        const cached = sessionStorage.getItem('bv_top_books_cache_v1');
+        if (!cached) {
+            topContainer.dataset.prefilled = '1';
+            displayTopBooks(DEFAULT_TOP_BOOKS);
+        }
+    }
+    // Then load actual data and replace when ready
     loadTopBooks();
+
+    // Ensure favorites render when opening Profile
+    const profileLink = document.getElementById('profileLink');
+    if (profileLink) {
+        profileLink.addEventListener('click', () => {
+            if (window.favorites && typeof window.favorites.displayFavorites === 'function') {
+                setTimeout(() => window.favorites.displayFavorites(), 0);
+            }
+        });
+    }
 });
+
+// Fetch with timeout utility
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 4000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(resource, { ...options, signal: controller.signal });
+        return response;
+    } finally {
+        clearTimeout(id);
+    }
+}
 
 /**
  * Initialize the application
@@ -59,6 +114,12 @@ function initializeLanguage() {
         const value = select.value;
         localStorage.setItem(STORAGE_KEY, value);
         document.documentElement.setAttribute('lang', value);
+        // Re-apply translations site-wide
+        if (window.__i18n) {
+            window.__i18n.applyTranslations(document);
+        }
+        // Re-render dynamic sections that use strings
+        loadTopBooks();
     });
 }
     
@@ -198,6 +259,7 @@ function updateAuthUI() {
     const userInfo = document.getElementById('userInfo');
     const usernameDisplay = document.getElementById('usernameDisplay');
     const libraryLink = document.getElementById('libraryLink');
+    const profileLink = document.getElementById('profileLink');
     
     if (user) {
         if (loginBtn) loginBtn.style.display = 'none';
@@ -205,11 +267,15 @@ function updateAuthUI() {
         if (userInfo) userInfo.style.display = 'flex';
         if (usernameDisplay) usernameDisplay.textContent = `Hello, ${user.username}!`;
         if (libraryLink) libraryLink.style.display = 'block';
+        if (profileLink) profileLink.style.display = 'block';
+        document.body.classList.add('logged-in');
     } else {
         if (loginBtn) loginBtn.style.display = 'inline-block';
         if (registerBtn) registerBtn.style.display = 'inline-block';
         if (userInfo) userInfo.style.display = 'none';
         if (libraryLink) libraryLink.style.display = 'none';
+        if (profileLink) profileLink.style.display = 'none';
+        document.body.classList.remove('logged-in');
     }
 }
 
@@ -269,15 +335,34 @@ async function loadTopBooks() {
     if (!container) return;
 
     // Show loading
-    container.innerHTML = '<div class="loading-books"><div class="spinner"></div><p>Loading top books...</p></div>';
+    if (!container.dataset.prefilled) {
+        const loadingText = (window.__i18n ? window.__i18n.t('loading.top') : 'Loading top books...');
+        container.innerHTML = `<div class="loading-books"><div class="spinner"></div><p>${loadingText}</p></div>`;
+    }
+
+    // Try cache first for instant paint
+    const CACHE_KEY = 'bv_top_books_cache_v1';
+    try {
+        const cached = sessionStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const { ts, books } = JSON.parse(cached);
+            // 30 min TTL
+            if (Date.now() - ts < 30 * 60 * 1000 && Array.isArray(books) && books.length) {
+                displayTopBooks(books);
+                // refresh in background but do not block UI
+                refreshTopBooksCache(CACHE_KEY).catch(()=>{});
+                return;
+            }
+        }
+    } catch (_) {}
 
     try {
         // Determine backend URL
         const backendUrl = window.location.origin.includes('8000') 
             ? 'http://localhost:3000' 
             : window.location.origin;
-
-        const response = await fetch(`${backendUrl}/api/top-books?perGenre=4`);
+        // Request fewer per-genre items for speed
+        const response = await fetchWithTimeout(`${backendUrl}/api/top-books?perGenre=3`, { timeout: 4000 });
         
         if (!response.ok) {
             throw new Error('Failed to load top books');
@@ -287,6 +372,7 @@ async function loadTopBooks() {
         
         if (data.books && data.books.length > 0) {
             displayTopBooks(data.books);
+            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), books: data.books })); } catch(_) {}
         } else {
             // Fallback: use direct Google Books API
             loadTopBooksFallback();
@@ -298,32 +384,137 @@ async function loadTopBooks() {
     }
 }
 
+async function refreshTopBooksCache(CACHE_KEY){
+    try {
+        const backendUrl = window.location.origin.includes('8000') 
+            ? 'http://localhost:3000' 
+            : window.location.origin;
+        const response = await fetchWithTimeout(`${backendUrl}/api/top-books?perGenre=3`, { timeout: 4000 });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.books && data.books.length) {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), books: data.books }));
+            }
+        }
+    } catch(_) { /* ignore */ }
+}
+
 /**
  * Fallback: Load top books using direct Google Books API
  */
 async function loadTopBooksFallback() {
-    const genres = ['fiction', 'fantasy', 'mystery', 'romance', 'science fiction', 'horror', 'thriller', 'adventure'];
-    const allBooks = [];
-
-    for (const genre of genres.slice(0, 6)) {
+    const genres = ['fiction', 'fantasy', 'mystery', 'romance', 'science fiction', 'horror'];
+    const perGenre = 3;
+    const requests = genres.map(async (genre) => {
         try {
             const books = await searchAllBooks(`subject:${genre}`, 'google');
-            if (books.length > 0) {
-                allBooks.push(...books.slice(0, 3).map(book => ({ ...book, genre })));
-            }
-        } catch (error) {
-            console.error(`Error loading ${genre} books:`, error);
+            return books.slice(0, perGenre).map(b => ({ ...b, genre }));
+        } catch (e) {
+            console.error(`Error loading ${genre} books:`, e);
+            return [];
         }
-    }
-
-    if (allBooks.length > 0) {
+    });
+    const results = await Promise.all(requests);
+    const allBooks = results.flat();
+    if (allBooks.length) {
         displayTopBooks(allBooks);
+        try { sessionStorage.setItem('bv_top_books_cache_v1', JSON.stringify({ ts: Date.now(), books: allBooks })); } catch(_) {}
     } else {
         const container = document.getElementById('topBooksContainer');
         if (container) {
-            container.innerHTML = '<p class="no-books-message">Top books will appear here. Try searching for books to get started!</p>';
+            const noTxt = (window.__i18n ? window.__i18n.t('no.results') : 'No books found. Try a different search term or genre.');
+            container.innerHTML = `<p class="no-books-message">${noTxt}</p>`;
         }
     }
+}
+
+/**
+ * Create a top book card element
+ */
+function createTopBookCard(book) {
+    const card = document.createElement('div');
+    card.className = 'top-book-card';
+    card.dataset.bookId = book.id;
+    
+    // Cover
+    const coverDiv = document.createElement('div');
+    coverDiv.className = 'top-book-cover';
+    
+    const thumbnailUrl = (typeof getThumbnailUrl === 'function') ? getThumbnailUrl(book.image || book.thumbnail) : (book.image || book.thumbnail);
+    if (thumbnailUrl && (typeof isValidUrl === 'undefined' || isValidUrl(thumbnailUrl))) {
+        const img = document.createElement('img');
+        img.src = thumbnailUrl;
+        img.alt = book.title || '';
+        img.loading = 'lazy';
+        img.onerror = function() {
+            this.style.display = 'none';
+            const ph = document.createTextNode((typeof createPlaceholderCover === 'function') ? createPlaceholderCover(book.title) : '📚');
+            coverDiv.appendChild(ph);
+        };
+        coverDiv.appendChild(img);
+    } else {
+        coverDiv.textContent = (typeof createPlaceholderCover === 'function') ? createPlaceholderCover(book.title || '') : '📚';
+    }
+    card.appendChild(coverDiv);
+    
+    // Info
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'top-book-info';
+    
+    const titleEl = document.createElement('h4');
+    titleEl.className = 'top-book-title';
+    titleEl.textContent = (typeof sanitizeHTML === 'function') ? sanitizeHTML(book.title || 'Untitled') : (book.title || 'Untitled');
+    infoDiv.appendChild(titleEl);
+    
+    const authorEl = document.createElement('p');
+    authorEl.className = 'top-book-author';
+    authorEl.textContent = (typeof formatAuthors === 'function') ? formatAuthors(book.authors || ['Unknown']) : (Array.isArray(book.authors) ? book.authors.join(', ') : 'Unknown');
+    infoDiv.appendChild(authorEl);
+    
+    if (book.rating && typeof formatRating === 'function') {
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'top-book-rating';
+        ratingDiv.innerHTML = formatRating(book.rating);
+        if (book.ratingCount) {
+            ratingDiv.innerHTML += ` <span class="rating-count">(${book.ratingCount})</span>`;
+        }
+        infoDiv.appendChild(ratingDiv);
+    }
+    
+    // Add to Library button (if logged in)
+    if (typeof isLoggedIn === 'function' && isLoggedIn()) {
+        const libraryBtn = document.createElement('button');
+        libraryBtn.className = `library-add-btn ${(typeof isInLibrary === 'function' && isInLibrary(book.id)) ? 'in-library' : ''}`;
+        if (window.__i18n) {
+            libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? `✓ ${window.__i18n.t('library.inLibrary')}` : `❤️ ${window.__i18n.t('library.add')}`;
+        } else {
+            libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? '✓ In Library' : '❤️ Add to Library';
+        }
+        libraryBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (typeof toggleLibraryBook === 'function') {
+                toggleLibraryBook(book);
+                libraryBtn.classList.toggle('in-library');
+                if (window.__i18n) {
+                    libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? `✓ ${window.__i18n.t('library.inLibrary')}` : `❤️ ${window.__i18n.t('library.add')}`;
+                } else {
+                    libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? '✓ In Library' : '❤️ Add to Library';
+                }
+            }
+        };
+        infoDiv.appendChild(libraryBtn);
+    }
+    
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'top-book-view-btn';
+    viewBtn.textContent = (window.__i18n ? window.__i18n.t('book.viewDetails') : 'View Details');
+    viewBtn.onclick = () => { if (typeof showBookDetails === 'function') showBookDetails(book); };
+    infoDiv.appendChild(viewBtn);
+    
+    card.appendChild(infoDiv);
+    card.onclick = () => { if (typeof showBookDetails === 'function') showBookDetails(book); };
+    
+    return card;
 }
 
 /**
@@ -362,19 +553,41 @@ function displayTopBooks(books) {
     }
 
     container.innerHTML = html;
+    // Clear prefill flag once we have rendered
+    if (container.dataset.prefilled) {
+        delete container.dataset.prefilled;
+    }
 }
 
 /**
- * Create a top book card for display
+ * Create a book card for display
  */
-function createTopBookCard(book) {
+function createBookCard(book) {
     const card = document.createElement('div');
-    card.className = 'top-book-card';
+    card.className = 'book-card';
     card.dataset.bookId = book.id;
     
-    // Cover image
-    const coverDiv = document.createElement('div');
-    coverDiv.className = 'top-book-cover';
+    // Favorite toggle (top-right)
+    const favBtn = document.createElement('button');
+    favBtn.className = 'favorite-toggle';
+    const isFav = (window.favorites && window.favorites.isFavorite) ? window.favorites.isFavorite(book.id) : false;
+    favBtn.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
+    favBtn.innerHTML = isFav ? '❤️' : '🤍';
+    favBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (!window.favorites || !window.favorites.toggleFavorite) return;
+        const nowFav = window.favorites.toggleFavorite(book);
+        favBtn.innerHTML = nowFav ? '❤️' : '🤍';
+        favBtn.setAttribute('aria-label', nowFav ? 'Remove from favorites' : 'Add to favorites');
+        if (document.getElementById('profilePage')?.classList.contains('active') && window.favorites.displayFavorites) {
+            window.favorites.displayFavorites();
+        }
+    };
+    card.appendChild(favBtn);
+
+    // Cover image container
+    const coverContainer = document.createElement('div');
+    coverContainer.className = 'book-cover';
     
     const thumbnailUrl = getThumbnailUrl(book.image || book.thumbnail);
     if (thumbnailUrl && isValidUrl(thumbnailUrl)) {
@@ -426,7 +639,7 @@ function createTopBookCard(book) {
     // View button
     const viewBtn = document.createElement('button');
     viewBtn.className = 'top-book-view-btn';
-    viewBtn.textContent = 'View Details';
+    viewBtn.textContent = (window.__i18n ? window.__i18n.t('book.viewDetails') : 'View Details');
     viewBtn.onclick = () => showBookDetails(book);
     infoDiv.appendChild(viewBtn);
     
@@ -595,7 +808,11 @@ function displayBooks(books, title) {
     
     if (resultsCount) {
         const count = books.length;
-        resultsCount.textContent = `Found ${count} book${count !== 1 ? 's' : ''}`;
+        if (window.__i18n && window.__i18n.format) {
+            resultsCount.textContent = window.__i18n.format('results.count', { count });
+        } else {
+            resultsCount.textContent = `Found ${count} book${count !== 1 ? 's' : ''}`;
+        }
     }
     
     // Clear previous results
@@ -696,12 +913,20 @@ function createBookCard(book) {
     if (typeof isLoggedIn === 'function' && isLoggedIn()) {
         const libraryBtn = document.createElement('button');
         libraryBtn.className = `library-add-btn ${isInLibrary(book.id) ? 'in-library' : ''}`;
-        libraryBtn.innerHTML = isInLibrary(book.id) ? '✓ In Library' : '❤️ Add to Library';
+        if (window.__i18n) {
+            libraryBtn.innerHTML = isInLibrary(book.id) ? `✓ ${window.__i18n.t('library.inLibrary')}` : `❤️ ${window.__i18n.t('library.add')}`;
+        } else {
+            libraryBtn.innerHTML = isInLibrary(book.id) ? '✓ In Library' : '❤️ Add to Library';
+        }
         libraryBtn.onclick = (e) => {
             e.stopPropagation();
             toggleLibraryBook(book);
             libraryBtn.classList.toggle('in-library');
-            libraryBtn.innerHTML = isInLibrary(book.id) ? '✓ In Library' : '❤️ Add to Library';
+            if (window.__i18n) {
+                libraryBtn.innerHTML = isInLibrary(book.id) ? `✓ ${window.__i18n.t('library.inLibrary')}` : `❤️ ${window.__i18n.t('library.add')}`;
+            } else {
+                libraryBtn.innerHTML = isInLibrary(book.id) ? '✓ In Library' : '❤️ Add to Library';
+            }
         };
         actionsDiv.appendChild(libraryBtn);
     }
@@ -709,7 +934,7 @@ function createBookCard(book) {
     // View Details button
     const detailsBtn = document.createElement('button');
     detailsBtn.className = 'book-link';
-    detailsBtn.textContent = 'View Details';
+    detailsBtn.textContent = (window.__i18n ? window.__i18n.t('book.viewDetails') : 'View Details');
     detailsBtn.onclick = (e) => {
         e.stopPropagation();
         showBookDetails(book);
