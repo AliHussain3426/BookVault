@@ -6,16 +6,49 @@
     <title>BookVault - Your Digital Library</title>
     <meta name="description" content="BookVault - Discover, explore, and manage your favorite books with AI-powered recommendations">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <header>
         <nav class="navbar container">
             <div class="nav-brand">
-                <h1 class="logo">📚 BookVault</h1>
+                <a href="#" class="brand" aria-label="BookVault Home">
+                    <img src="images/bookvault-logo.png.png" alt="BookVault logo" class="brand-logo" />
+                    <span class="brand-text">BookVault</span>
+                </a>
             </div>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                <li class="nav-lang">
+                    <label for="languageSelect" class="sr-only">Language</label>
+                    <select id="languageSelect" class="language-select" aria-label="Select language">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="ru">Русский</option>
+                        <option value="zh-CN">简体中文</option>
+                        <option value="zh-TW">繁體中文</option>
+                        <option value="ja">日本語</option>
+                        <option value="ko">한국어</option>
+                        <option value="ar">العربية</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="bn">বাংলা</option>
+                        <option value="ur">اردو</option>
+                        <option value="tr">Türkçe</option>
+                        <option value="nl">Nederlands</option>
+                        <option value="sv">Svenska</option>
+                        <option value="pl">Polski</option>
+                        <option value="uk">Українська</option>
+                        <option value="vi">Tiếng Việt</option>
+                        <option value="th">ไทย</option>
+                    </select>
+                </li>
                 <li><a href="#" class="nav-link" data-page="library" id="libraryLink" style="display: none;">My Library</a></li>
                 <li><a href="#" class="nav-link" data-page="about">About</a></li>
             </ul>

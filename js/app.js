@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
     initializeAIAssistant();
     initializeNavigation();
+    initializeLanguage();
     loadTopBooks();
 });
 
@@ -33,6 +34,33 @@ function initializeApp() {
     if (searchBtn) {
         searchBtn.addEventListener('click', handleSearch);
     }
+
+/**
+ * Initialize Language Selector
+ * - Restores saved language from localStorage
+ * - Updates <html lang="..."> attribute
+ * - Persists selection on change
+ */
+function initializeLanguage() {
+    const select = document.getElementById('languageSelect');
+    if (!select) return;
+
+    const STORAGE_KEY = 'bv_lang';
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && [...select.options].some(o => o.value === saved)) {
+        select.value = saved;
+        document.documentElement.setAttribute('lang', saved);
+    } else {
+        // default to English if none saved
+        document.documentElement.setAttribute('lang', select.value || 'en');
+    }
+
+    select.addEventListener('change', () => {
+        const value = select.value;
+        localStorage.setItem(STORAGE_KEY, value);
+        document.documentElement.setAttribute('lang', value);
+    });
+}
     
     if (searchInput) {
         // Hide placeholder on focus/input
