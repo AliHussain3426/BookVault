@@ -131,28 +131,39 @@ async function showBookDetails(book) {
 
 // Toggle book in library
 function toggleLibraryBook(book) {
-    if (!isLoggedIn()) {
+    console.log('toggleLibraryBook called');
+    console.log('isLoggedIn:', typeof isLoggedIn === 'function' ? isLoggedIn() : 'function not found');
+    
+    if (typeof isLoggedIn !== 'function' || !isLoggedIn()) {
         alert('Please login to manage your library');
+        console.warn('Toggle failed: User not logged in');
         return;
     }
     
-    if (isInLibrary(book.id)) {
-        removeFromLibrary(book.id);
-    } else {
-        addToLibrary(book);
-    }
-    
-    // Refresh details if modal is open
-    const modal = document.getElementById('bookDetailModal');
-    if (modal && modal.style.display === 'block') {
-        showBookDetails(book);
-    }
-    
-    // Update button on book card
-    const btn = document.querySelector(`[data-book-id="${book.id}"] .library-add-btn`);
-    if (btn) {
-        btn.classList.toggle('in-library');
-        btn.innerHTML = isInLibrary(book.id) ? '✓ In Library' : '❤️ Add to Library';
+    try {
+        if (isInLibrary(book.id)) {
+            removeFromLibrary(book.id);
+            console.log('Book removed from library');
+        } else {
+            addToLibrary(book);
+            console.log('Book added to library');
+        }
+        
+        // Refresh details if modal is open
+        const modal = document.getElementById('bookDetailModal');
+        if (modal && modal.style.display === 'block') {
+            showBookDetails(book);
+        }
+        
+        // Update button on book card
+        const btn = document.querySelector(`[data-book-id="${book.id}"] .library-add-btn`);
+        if (btn) {
+            btn.classList.toggle('in-library');
+            btn.innerHTML = isInLibrary(book.id) ? '✓ In Library' : '❤️ Add to Library';
+        }
+    } catch (error) {
+        console.error('Error toggling library book:', error);
+        alert('An error occurred. Please try again.');
     }
 }
 

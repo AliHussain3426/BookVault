@@ -707,11 +707,18 @@ header {
     overflow: hidden;
 }
 
+.book-metadata {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
 .book-rating {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    gap: 0.25rem;
 }
 
 .rating-stars {
@@ -723,6 +730,42 @@ header {
     font-size: 0.9rem;
     color: #666;
     font-weight: 500;
+}
+
+.rating-text {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 600;
+    margin-left: 0.25rem;
+}
+
+.book-downloads {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.download-icon {
+    font-size: 1.1rem;
+}
+
+.download-count {
+    font-weight: 500;
+    color: #777;
+}
+
+[data-theme="dark"] .rating-text {
+    color: #aaa;
+}
+
+[data-theme="dark"] .book-downloads {
+    color: #aaa;
+}
+
+[data-theme="dark"] .download-count {
+    color: #999;
 }
 
 .book-description {

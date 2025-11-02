@@ -22,10 +22,14 @@ function saveLibrary(books) {
 
 // Add book to library
 function addToLibrary(book) {
+    console.log('addToLibrary called with book:', book);
     const user = getCurrentUser();
+    console.log('Current user:', user);
+    
     if (!user) {
         const msg = (window.__i18n ? window.__i18n.t('auth.pleaseLoginToSave') : 'Please login to save books to your library');
         alert(msg);
+        console.warn('Add to library failed: User not logged in');
         return false;
     }
     
@@ -33,6 +37,7 @@ function addToLibrary(book) {
     
     // Check if already exists
     if (library.some(b => b.id === book.id)) {
+        console.log('Book already in library');
         return false; // Already in library
     }
     
@@ -42,6 +47,7 @@ function addToLibrary(book) {
     });
     
     saveLibrary(library);
+    console.log('Book added to library successfully');
     return true;
 }
 
@@ -148,6 +154,45 @@ function createLibraryBookCard(book) {
     authorElement.textContent = formatAuthors(book.authors);
     infoDiv.appendChild(authorElement);
     
+    // Metadata container (rating + downloads)
+    const metadataDiv = document.createElement('div');
+    metadataDiv.className = 'book-metadata';
+    
+    // Rating out of 5 (if available)
+    if (book.rating) {
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'book-rating';
+        ratingDiv.innerHTML = formatRating(book.rating);
+        const ratingText = document.createElement('span');
+        ratingText.className = 'rating-text';
+        ratingText.textContent = ` ${book.rating}/5`;
+        ratingDiv.appendChild(ratingText);
+        metadataDiv.appendChild(ratingDiv);
+    }
+    
+    // Reader count (use ratingCount as proxy for popularity)
+    if (book.ratingCount) {
+        const readersDiv = document.createElement('div');
+        readersDiv.className = 'book-downloads';
+        readersDiv.innerHTML = `<span class="download-icon">👥</span> <span class="download-count">${book.ratingCount.toLocaleString()} readers</span>`;
+        metadataDiv.appendChild(readersDiv);
+    }
+    
+    if (metadataDiv.children.length > 0) {
+        infoDiv.appendChild(metadataDiv);
+    }
+    
+    // Summary/Description
+    const descElement = document.createElement('p');
+    descElement.className = 'book-description';
+    const description = book.description || book.summary || `Explore this ${book.categories?.[0] || 'interesting'} book by ${formatAuthors(book.authors)}.`;
+    descElement.textContent = formatDescription(description);
+    infoDiv.appendChild(descElement);
+    
+    // Action buttons container
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'book-actions';
+    
     // Remove button
     const removeBtn = document.createElement('button');
     removeBtn.className = 'library-remove-btn';
@@ -159,15 +204,16 @@ function createLibraryBookCard(book) {
             displayLibrary();
         }
     };
-    infoDiv.appendChild(removeBtn);
+    actionsDiv.appendChild(removeBtn);
     
     // View button
     const viewBtn = document.createElement('button');
     viewBtn.className = 'book-link';
     viewBtn.textContent = (window.__i18n ? window.__i18n.t('book.viewDetails') : 'View Details');
     viewBtn.onclick = () => showBookDetails(book);
-    infoDiv.appendChild(viewBtn);
+    actionsDiv.appendChild(viewBtn);
     
+    infoDiv.appendChild(actionsDiv);
     card.appendChild(infoDiv);
     return card;
 }

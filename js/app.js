@@ -1,20 +1,20 @@
 // 15 default preview books (lightweight data) to show instantly
 const DEFAULT_TOP_BOOKS = [
-  { id: 'd1', title: 'The Classic Tome', authors: ['A. Writer'], thumbnail: '', genre: 'fiction' },
-  { id: 'd2', title: 'Beneath Old Oaks', authors: ['E. Greene'], thumbnail: '', genre: 'fiction' },
-  { id: 'd3', title: 'Whispers of Pages', authors: ['L. Porter'], thumbnail: '', genre: 'fiction' },
-  { id: 'd4', title: 'Guild of Stars', authors: ['M. Hewitt'], thumbnail: '', genre: 'fantasy' },
-  { id: 'd5', title: 'Ember & Ash', authors: ['K. Rowan'], thumbnail: '', genre: 'fantasy' },
-  { id: 'd6', title: 'Crown of Thorns', authors: ['S. Vale'], thumbnail: '', genre: 'fantasy' },
-  { id: 'd7', title: 'Clockwork Ciphers', authors: ['I. Black'], thumbnail: '', genre: 'mystery' },
-  { id: 'd8', title: 'The Lost Ledger', authors: ['R. Finch'], thumbnail: '', genre: 'mystery' },
-  { id: 'd9', title: 'Ink & Alibi', authors: ['P. Doyle'], thumbnail: '', genre: 'mystery' },
-  { id: 'd10', title: 'Letters Never Sent', authors: ['E. Hart'], thumbnail: '', genre: 'romance' },
-  { id: 'd11', title: 'Autumn Serenade', authors: ['C. Wren'], thumbnail: '', genre: 'romance' },
-  { id: 'd12', title: 'Lanterns at Dusk', authors: ['J. Hale'], thumbnail: '', genre: 'romance' },
-  { id: 'd13', title: 'Orbit of Echoes', authors: ['T. Quill'], thumbnail: '', genre: 'science fiction' },
-  { id: 'd14', title: 'Brass Nebula', authors: ['N. Rivers'], thumbnail: '', genre: 'science fiction' },
-  { id: 'd15', title: 'Pilgrim to Andromeda', authors: ['V. Cross'], thumbnail: '', genre: 'science fiction' }
+  { id: 'd1', title: 'The Classic Tome', authors: ['A. Writer'], thumbnail: '', genre: 'fiction', description: 'A timeless story that explores the depths of human emotion and the power of storytelling.' },
+  { id: 'd2', title: 'Beneath Old Oaks', authors: ['E. Greene'], thumbnail: '', genre: 'fiction', description: 'A heartwarming tale of family, tradition, and the secrets that bind us together across generations.' },
+  { id: 'd3', title: 'Whispers of Pages', authors: ['L. Porter'], thumbnail: '', genre: 'fiction', description: 'An enchanting journey through the world of books, where every page reveals a new adventure.' },
+  { id: 'd4', title: 'Guild of Stars', authors: ['M. Hewitt'], thumbnail: '', genre: 'fantasy', description: 'A magical quest across celestial realms where ancient guilds hold the fate of the universe.' },
+  { id: 'd5', title: 'Ember & Ash', authors: ['K. Rowan'], thumbnail: '', genre: 'fantasy', description: 'In a world where fire and shadow collide, one warrior must rise to restore the balance.' },
+  { id: 'd6', title: 'Crown of Thorns', authors: ['S. Vale'], thumbnail: '', genre: 'fantasy', description: 'A dark fantasy epic about power, betrayal, and the price of wearing a cursed crown.' },
+  { id: 'd7', title: 'Clockwork Ciphers', authors: ['I. Black'], thumbnail: '', genre: 'mystery', description: 'A Victorian detective unravels cryptic codes in a steampunk London filled with intrigue.' },
+  { id: 'd8', title: 'The Lost Ledger', authors: ['R. Finch'], thumbnail: '', genre: 'mystery', description: 'A financial thriller where hidden accounts reveal a conspiracy spanning decades.' },
+  { id: 'd9', title: 'Ink & Alibi', authors: ['P. Doyle'], thumbnail: '', genre: 'mystery', description: 'A mystery novelist becomes the prime suspect when her fictional murders come to life.' },
+  { id: 'd10', title: 'Letters Never Sent', authors: ['E. Hart'], thumbnail: '', genre: 'romance', description: 'Unsent letters from the past bring two strangers together in an unexpected love story.' },
+  { id: 'd11', title: 'Autumn Serenade', authors: ['C. Wren'], thumbnail: '', genre: 'romance', description: 'A musician and a painter find love in a small town painted with autumn colors.' },
+  { id: 'd12', title: 'Lanterns at Dusk', authors: ['J. Hale'], thumbnail: '', genre: 'romance', description: 'Under festival lanterns, two souls reconnect after years apart to rekindle their flame.' },
+  { id: 'd13', title: 'Orbit of Echoes', authors: ['T. Quill'], thumbnail: '', genre: 'science fiction', description: 'A space odyssey exploring time loops and the echoes of choices across parallel universes.' },
+  { id: 'd14', title: 'Brass Nebula', authors: ['N. Rivers'], thumbnail: '', genre: 'science fiction', description: 'Steampunk meets space opera in this tale of rebels fighting a mechanical empire.' },
+  { id: 'd15', title: 'Pilgrim to Andromeda', authors: ['V. Cross'], thumbnail: '', genre: 'science fiction', description: 'A lone traveler embarks on a journey to humanity\'s new home among the stars.' }
 ];
 /**
  * Main Application Logic for BookVault
@@ -37,17 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.__i18n) {
         window.__i18n.applyTranslations(document);
     }
-    // Prefill Top Books with default preview (15 items) for instant render
-    const topContainer = document.getElementById('topBooksContainer');
-    if (topContainer) {
-        const cached = sessionStorage.getItem('bv_top_books_cache_v1');
-        if (!cached) {
-            topContainer.dataset.prefilled = '1';
-            displayTopBooks(DEFAULT_TOP_BOOKS);
-        }
-    }
-    // Then load actual data and replace when ready
-    loadTopBooks();
 
     // Ensure favorites render when opening Profile
     const profileLink = document.getElementById('profileLink');
@@ -481,30 +470,14 @@ function createTopBookCard(book) {
         infoDiv.appendChild(ratingDiv);
     }
     
-    // Add to Library button (if logged in)
-    if (typeof isLoggedIn === 'function' && isLoggedIn()) {
-        const libraryBtn = document.createElement('button');
-        libraryBtn.className = `library-add-btn ${(typeof isInLibrary === 'function' && isInLibrary(book.id)) ? 'in-library' : ''}`;
-        if (window.__i18n) {
-            libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? `✓ ${window.__i18n.t('library.inLibrary')}` : `❤️ ${window.__i18n.t('library.add')}`;
-        } else {
-            libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? '✓ In Library' : '❤️ Add to Library';
-        }
-        libraryBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (typeof toggleLibraryBook === 'function') {
-                toggleLibraryBook(book);
-                libraryBtn.classList.toggle('in-library');
-                if (window.__i18n) {
-                    libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? `✓ ${window.__i18n.t('library.inLibrary')}` : `❤️ ${window.__i18n.t('library.add')}`;
-                } else {
-                    libraryBtn.innerHTML = (typeof isInLibrary === 'function' && isInLibrary(book.id)) ? '✓ In Library' : '❤️ Add to Library';
-                }
-            }
-        };
-        infoDiv.appendChild(libraryBtn);
-    }
+    // Summary/Description
+    const descEl = document.createElement('p');
+    descEl.className = 'book-description';
+    const description = book.description || book.summary || `Discover this ${book.genre || 'captivating'} book by ${(typeof formatAuthors === 'function') ? formatAuthors(book.authors || ['Unknown']) : 'Unknown'}.`;
+    descEl.textContent = (typeof formatDescription === 'function') ? formatDescription(description, 120) : description.substring(0, 120) + (description.length > 120 ? '...' : '');
+    infoDiv.appendChild(descEl);
     
+    // Only show View Details button (no Add to Library for recommended books)
     const viewBtn = document.createElement('button');
     viewBtn.className = 'top-book-view-btn';
     viewBtn.textContent = (window.__i18n ? window.__i18n.t('book.viewDetails') : 'View Details');
@@ -891,12 +864,32 @@ function createBookCard(book) {
     authorElement.textContent = formatAuthors(book.authors);
     infoDiv.appendChild(authorElement);
     
-    // Rating
+    // Metadata container (rating + downloads)
+    const metadataDiv = document.createElement('div');
+    metadataDiv.className = 'book-metadata';
+    
+    // Rating out of 5
     if (book.rating !== null && book.rating !== undefined) {
         const ratingDiv = document.createElement('div');
         ratingDiv.className = 'book-rating';
         ratingDiv.innerHTML = formatRating(book.rating);
-        infoDiv.appendChild(ratingDiv);
+        const ratingText = document.createElement('span');
+        ratingText.className = 'rating-text';
+        ratingText.textContent = ` ${book.rating}/5`;
+        ratingDiv.appendChild(ratingText);
+        metadataDiv.appendChild(ratingDiv);
+    }
+    
+    // Reader count (use ratingCount as proxy for popularity)
+    if (book.ratingCount) {
+        const readersDiv = document.createElement('div');
+        readersDiv.className = 'book-downloads';
+        readersDiv.innerHTML = `<span class="download-icon">👥</span> <span class="download-count">${book.ratingCount.toLocaleString()} readers</span>`;
+        metadataDiv.appendChild(readersDiv);
+    }
+    
+    if (metadataDiv.children.length > 0) {
+        infoDiv.appendChild(metadataDiv);
     }
     
     // Description - Always show, even if empty
