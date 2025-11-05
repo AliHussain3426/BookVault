@@ -309,6 +309,10 @@ function showPage(pageName) {
             displayLibrary();
         } else if (pageName === 'home') {
             loadTopBooks();
+        } else if (pageName === 'freebooks') {
+            if (window.freebooks && window.freebooks.displayFreeBooks) {
+                window.freebooks.displayFreeBooks('all');
+            }
         }
     }
     

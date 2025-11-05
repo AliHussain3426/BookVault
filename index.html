@@ -21,6 +21,7 @@
             </div>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#" class="nav-link" data-page="library" id="libraryLink" style="display: none;" data-i18n="nav.library">My Library</a></li>
+                <li><a href="#" class="nav-link" data-page="freebooks" data-i18n="nav.freebooks">Free Books</a></li>
                 <li><a href="#" class="nav-link active" data-page="home" data-i18n="nav.home">Home</a></li>
             </ul>
             <div class="nav-actions">
@@ -169,6 +170,30 @@
             </section>
         </div>
 
+        <!-- Free Books Page -->
+        <div id="freebooksPage" class="page" style="display: none;">
+            <section class="freebooks-section">
+                <h2 data-i18n="freebooks.title">Free Books to Read</h2>
+                <p class="freebooks-subtitle" data-i18n="freebooks.subtitle">Click on any book to read it for free. Books from Project Gutenberg and Open Library.</p>
+                
+                <div class="freebooks-filters">
+                    <button class="filter-btn active" data-source="all" data-i18n="freebooks.filter.all">All Sources</button>
+                    <button class="filter-btn" data-source="gutenberg" data-i18n="freebooks.filter.gutenberg">Project Gutenberg</button>
+                    <button class="filter-btn" data-source="openlibrary" data-i18n="freebooks.filter.openlibrary">Open Library</button>
+                </div>
+                
+                <div id="freebooksLoading" class="loading-section" style="display: none;">
+                    <div class="spinner"></div>
+                    <p data-i18n="freebooks.loading">Loading free books...</p>
+                </div>
+                
+                <div id="freebooksContainer" class="books-container"></div>
+                <div id="emptyFreebooks" class="empty-library" style="display: none;">
+                    <p data-i18n="freebooks.empty">No free books found. Please try again later.</p>
+                </div>
+            </section>
+        </div>
+
         <!-- Profile Page -->
         <div id="profilePage" class="page" style="display: none;">
             <section class="profile-section">
@@ -221,6 +246,7 @@
     <script src="js/api.js"></script>
     <script src="js/library.js"></script>
     <script src="js/reviews.js"></script>
+    <script src="js/freebooks.js"></script>
     <script src="js/ai-assistant.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/app.js"></script>

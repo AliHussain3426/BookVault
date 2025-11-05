@@ -1596,3 +1596,118 @@ footer::before {
     box-shadow: var(--shadow);
 }
 
+/* Free Books Section */
+.freebooks-section {
+    padding: 2rem 0;
+}
+
+.freebooks-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.freebooks-subtitle {
+    font-size: 1.1rem;
+    color: var(--neutral-color);
+    margin-bottom: 2rem;
+}
+
+.freebooks-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.filter-btn:hover {
+    border-color: var(--primary-color);
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.free-book-card {
+    position: relative;
+    transition: var(--transition);
+}
+
+.free-book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.book-source-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--accent-color);
+    color: var(--text-color);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.read-now-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white !important;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.read-now-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+[data-theme="dark"] .read-now-btn {
+    background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+}
+
+[data-theme="dark"] .read-now-btn:hover {
+    background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+}
+
+/* Responsive adjustments for free books */
+@media (max-width: 768px) {
+    .freebooks-filters {
+        gap: 0.5rem;
+    }
+    
+    .filter-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .freebooks-section h2 {
+        font-size: 2rem;
+    }
+}
+
